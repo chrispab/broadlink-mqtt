@@ -27,7 +27,9 @@ print(dirname)
 # logging.config.fileConfig(dirname + 'logging.conf')
 logging.config.fileConfig('data/' + 'logging.conf')
 CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
+print(CONFIG)
 CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
+print(CONFIG_CUSTOM)
 
 
 class Config(object):
@@ -36,7 +38,9 @@ class Config(object):
         exec(compile(open(filename, "rb").read(), filename, 'exec'), self.config)
         if os.path.isfile(custom_filename):
             exec(compile(open(custom_filename, "rb").read(), custom_filename, 'exec'), self.config)
-
+            print("Found custom config")
+            print(self.config)
+        
         if self.config.get('ca_certs', None) is not None:
             self.config['tls'] = True
 
@@ -331,9 +335,12 @@ def macro(device, file):
 
 
 def get_device(cf):
+    print("looking for device!")
+    
     device_type = cf.get('device_type', 'lookup')
     if device_type == 'lookup':
         local_address = cf.get('local_address', None)
+        print(local_address)
         lookup_timeout = cf.get('lookup_timeout', 20)
         devices = broadlink.discover(timeout=lookup_timeout) if local_address is None else \
             broadlink.discover(timeout=lookup_timeout, local_ip_address=local_address)
@@ -604,6 +611,8 @@ if __name__ == '__main__':
 
     mqttc.username_pw_set(cf.get('mqtt_username'), cf.get('mqtt_password'))
 
+
+    print("MQTT broker: " + cf.get('mqtt_broker', 'localhost'))
     while True:
         try:
             mqttc.connect(cf.get('mqtt_broker', 'localhost'), int(cf.get('mqtt_port', '1883')), 60)
