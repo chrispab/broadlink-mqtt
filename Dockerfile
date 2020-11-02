@@ -34,3 +34,8 @@ CMD ["python3", "mqtt.py"]
 # works
 # dockebuild . -t broadlink2mqtt
 # docker run --rm -it --network my-macvlan-net -p 80:80 -p 443:443 -p 1883:1883 -p 8883:8883 --name broadlink2mqtt -v broadlink_data:/broadlink-mqtt/data broadlink2mqtt
+
+# docker commit -m "1st broadlink2mqtt img" -a "chris b" broadlink2mqtt chrispab/broadlink2mqtt:pi
+# docker push chrispab/broadlink2mqtt
+# docker login
+# 
