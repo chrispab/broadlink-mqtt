@@ -39,3 +39,5 @@ CMD ["python3", "mqtt.py"]
 # docker push chrispab/broadlink2mqtt
 # docker login
 # 
+# dockebuild . -t broadlink2mqtt
+# docker run --rm -it --network host -p 80:80 -p 443:443 -p 1883:1883 -p 8883:8883 --name broadlink2mqtt -v broadlink2mqtt:/broadlink-mqtt/data broadlink2mqtt
