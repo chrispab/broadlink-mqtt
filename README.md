@@ -1,17 +1,24 @@
 
 # Dockerized
+## For Pi4, do these on 'the' platform
+
 ## Build
+This is built using the 'Dockerfile':
 ```
-docker build . -t broadlink2mqtt
+docker build . -t broadlink2mqtt:latest
+
+docker commit -m "default multiple_lookup" -a "chris b" broadlink2mqtt chrispab/broadlink2mqtt:latest
+
+docker push chrispab/broadlink2mqtt
 ```
 ## Run
+To run the container from the command line:
 ```
 docker run --rm -it --network my-macvlan-net -p 80:80 -p 443:443 -p 1883:1883 -p 8883:8883 --name broadlink2mqtt -v broadlink_data:/broadlink-mqtt/data broadlink2mqtt
 ```
 
 ### old - not working
 - docker build . -t broadlink2mqtt
-
 - docker run -it --name broadlink2mqtt -v ./data:/broadlink-mqtt/data broadlink2mqtt 
 
 # MQTT client to control BroadLink devices

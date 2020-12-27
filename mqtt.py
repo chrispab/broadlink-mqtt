@@ -39,7 +39,7 @@ class Config(object):
         if os.path.isfile(custom_filename):
             exec(compile(open(custom_filename, "rb").read(), custom_filename, 'exec'), self.config)
             print("Found custom config")
-            print(self.config)
+            # print(self.config)
         
         if self.config.get('ca_certs', None) is not None:
             self.config['tls'] = True
@@ -340,7 +340,7 @@ def get_device(cf):
     device_type = cf.get('device_type', 'lookup')
     if device_type == 'lookup':
         local_address = cf.get('local_address', None)
-        print(local_address)
+        # print(local_address)
         lookup_timeout = cf.get('lookup_timeout', 20)
         devices = broadlink.discover(timeout=lookup_timeout) if local_address is None else \
             broadlink.discover(timeout=lookup_timeout, local_ip_address=local_address)
