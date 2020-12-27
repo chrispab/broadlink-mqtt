@@ -23,24 +23,41 @@ except ImportError:
 
 # read initial config files
 dirname = os.path.dirname(os.path.abspath(__file__)) + '/data/'
-print(dirname)
-# logging.config.fileConfig(dirname + 'logging.conf')
-logging.config.fileConfig('data/' + 'logging.conf')
-CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
-print(CONFIG)
-CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
-print(CONFIG_CUSTOM)
+print()
 
+# dirname = 'data/'
+print("dirname:",dirname)
+logging.config.fileConfig(dirname + 'logging.conf')
+# logging.config.fileConfig('logging.conf')
+# CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
+CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
+
+print("CONFIG:",CONFIG)
+# print("================================================")
+
+CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
+print("CONFIG_CUSTOM:",CONFIG_CUSTOM)
+print("================================================")
 
 class Config(object):
     def __init__(self, filename=CONFIG, custom_filename=CONFIG_CUSTOM):
         self.config = {}
         exec(compile(open(filename, "rb").read(), filename, 'exec'), self.config)
         if os.path.isfile(custom_filename):
-            exec(compile(open(custom_filename, "rb").read(), custom_filename, 'exec'), self.config)
-            print("Found custom config")
-            print(self.config)
-        
+            print("Found custom config...")
+            print("custom_filename: " + custom_filename)
+
+            custfile = open(custom_filename, "rb")
+            exec(compile(custfile.read(), custom_filename, 'exec'), self.config)
+            custfile.close()
+
+            print(self.config.get('device_type'))
+            print()
+            custfile = open(custom_filename, "rb")
+            print(custfile.read())
+            print()
+            custfile.close()
+
         if self.config.get('ca_certs', None) is not None:
             self.config['tls'] = True
 
@@ -335,11 +352,14 @@ def macro(device, file):
 
 
 def get_device(cf):
-    print("looking for device!")
-    
+
+    print("looking for device(s)!")
+    print('device_type: ' + cf.get('device_type'))
+
     device_type = cf.get('device_type', 'lookup')
     if device_type == 'lookup':
         local_address = cf.get('local_address', None)
+        print('local_address: ')
         print(local_address)
         lookup_timeout = cf.get('lookup_timeout', 20)
         devices = broadlink.discover(timeout=lookup_timeout) if local_address is None else \
@@ -353,6 +373,7 @@ def get_device(cf):
                           ')')
             sys.exit(2)
         return configure_device(devices[0], topic_prefix)
+
     elif device_type == 'multiple_lookup':
         local_address = cf.get('local_address', None)
         lookup_timeout = cf.get('lookup_timeout', 20)
@@ -364,13 +385,18 @@ def get_device(cf):
         mqtt_multiple_prefix_format = cf.get('mqtt_multiple_subprefix_format', None)
         devices_dict = {}
         for device in devices:
+            print(devices)
             mqtt_subprefix = mqtt_multiple_prefix_format.format(
                 type=device.type,
                 host=device.host[0],
                 mac='_'.join(format(s, '02x') for s in device.mac[::-1]),
                 mac_nic='_'.join(format(s, '02x') for s in device.mac[2::-1]))
+            print("END 1")
+            print(device,topic_prefix, mqtt_subprefix)
             device = configure_device(device, topic_prefix + mqtt_subprefix)
+            print("END 2")
             devices_dict[mqtt_subprefix] = device
+            print("END 3")
         return devices_dict
     elif device_type == 'test':
         return configure_device(TestDevice(cf), topic_prefix)
@@ -400,10 +426,12 @@ def get_device(cf):
 
 
 def configure_device(device, mqtt_prefix):
+    print("END 4")
     device.auth()
+    print("END 5")
     logging.debug('Connected to \'%s\' Broadlink device at \'%s\' (MAC %s) and started listening for commands at MQTT topic having prefix \'%s\' '
                   % (device.type, device.host[0], ':'.join(format(s, '02x') for s in device.mac[::-1]), mqtt_prefix))
-
+    print("END 6")
     broadlink_rm_temperature_interval = cf.get('broadlink_rm_temperature_interval', 0)
     if (device.type == 'RM2' or device.type == 'RM4') and broadlink_rm_temperature_interval > 0:
         scheduler = sched.scheduler(time.time, time.sleep)

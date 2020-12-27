@@ -8,17 +8,16 @@ docker build . -t broadlink2mqtt
 ```
 docker run --rm -it --network my-macvlan-net -p 80:80 -p 443:443 -p 1883:1883 -p 8883:8883 --name broadlink2mqtt -v broadlink_data:/broadlink-mqtt/data broadlink2mqtt
 ```
-
 ### old - not working
 - docker build . -t broadlink2mqtt
 - docker run -it --name broadlink2mqtt -v ./data:/broadlink-mqtt/data broadlink2mqtt 
-
-
 # MQTT client to control BroadLink devices (This includes British General (BG) Smart Sockets)
 
 Note: To do the initial BG smartsocket connect to home wifi network, use this utility first (rather than the BG or broadlink app):
 https://github.com/mjg59/python-broadlink
 
+If setting up using the BG app, only add new device via AP config button, DO NOT complete the BG app 'add' device to app section.
+Close the BGF appp before the final ADD/SETUP stage
 
 ## Supported devices
    * [**RM Pro / RM2 / RM3 mini / RM4**](#rm2rm3rm4) IR/RF controllers (device_type = 'rm' or 'rm4')  
