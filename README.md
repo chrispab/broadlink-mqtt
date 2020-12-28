@@ -5,7 +5,7 @@
 ## Build
 This is built using the 'Dockerfile':
 ```
-docker build . -t broadlink2mqtt:latest
+docker build . -t broadlink2mqtt
 
 docker commit -m "default multiple_lookup" -a "chris b" broadlink2mqtt chrispab/broadlink2mqtt:latest
 

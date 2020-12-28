@@ -24,8 +24,10 @@ except ImportError:
 # read initial config files
 dirname = os.path.dirname(os.path.abspath(__file__)) + '/data/'
 print(dirname)
-# logging.config.fileConfig(dirname + 'logging.conf')
-logging.config.fileConfig('data/' + 'logging.conf')
+confname = dirname + 'logging.conf'
+print("confnamem : " + confname)
+logging.config.fileConfig(confname)
+# logging.config.fileConfig('logging.conf')
 CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
 print(CONFIG)
 CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
