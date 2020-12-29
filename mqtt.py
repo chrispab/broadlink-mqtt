@@ -22,15 +22,6 @@ except ImportError:
     HAVE_TLS = False
 
 # read initial config files
-dirname = os.path.dirname(os.path.abspath(__file__)) + '/data/'
-print()
-
-# dirname = 'data/'
-print("dirname:",dirname)
-logging.config.fileConfig(dirname + 'logging.conf')
-# logging.config.fileConfig('logging.conf')
-# CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
-CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
 
 print("CONFIG:",CONFIG)
 # print("================================================")
@@ -39,25 +30,39 @@ CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
 print("CONFIG_CUSTOM:",CONFIG_CUSTOM)
 print("================================================")
 
+print("..cwd: " + os.getcwd())
+
+dirname = os.path.dirname(os.path.abspath(__file__))
+print("dirname: " + dirname)
+# dirname = dirname + '/data/'
+
+# CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
+# print("CONFIG: "+CONFIG)
+# CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
+# print("CONFIG_CUSTOM: "+CONFIG_CUSTOM)
+
+# print("path with data dir: " + dirname)
+# confname = dirname + 'logging.conf'
+# # confname = 'logging.conf'
+# print("confnamem : " + confname)
+# logging.config.fileConfig(confname)
+# # logging.config.fileConfig('logging.conf')
+
+# read initial config files
+dirname = os.path.dirname(os.path.abspath(__file__)) + '/'
+logging.config.fileConfig(dirname + 'logging.conf')
+CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
+CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'data/custom.conf')
+
 class Config(object):
     def __init__(self, filename=CONFIG, custom_filename=CONFIG_CUSTOM):
         self.config = {}
         exec(compile(open(filename, "rb").read(), filename, 'exec'), self.config)
         if os.path.isfile(custom_filename):
-            print("Found custom config...")
-            print("custom_filename: " + custom_filename)
-
-            custfile = open(custom_filename, "rb")
-            exec(compile(custfile.read(), custom_filename, 'exec'), self.config)
-            custfile.close()
-
-            print(self.config.get('device_type'))
-            print()
-            custfile = open(custom_filename, "rb")
-            print(custfile.read())
-            print()
-            custfile.close()
-
+            exec(compile(open(custom_filename, "rb").read(), custom_filename, 'exec'), self.config)
+            print("Found custom config")
+            # print(self.config)
+        
         if self.config.get('ca_certs', None) is not None:
             self.config['tls'] = True
 
@@ -357,10 +362,10 @@ def get_device(cf):
     print('device_type: ' + cf.get('device_type'))
 
     device_type = cf.get('device_type', 'lookup')
+    print("device_type: "+device_type)
     if device_type == 'lookup':
         local_address = cf.get('local_address', None)
-        print('local_address: ')
-        print(local_address)
+        # print(local_address)
         lookup_timeout = cf.get('lookup_timeout', 20)
         devices = broadlink.discover(timeout=lookup_timeout) if local_address is None else \
             broadlink.discover(timeout=lookup_timeout, local_ip_address=local_address)

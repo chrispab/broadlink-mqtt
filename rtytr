@@ -1,7 +1,0 @@
-docker network create -d macvlan --subnet=192.168.0.0/24  --gateway=192.168.0.1  -o parent=eno1   my-macvlan-net
-
-
-
-docker run --rm -dit   --network my-macvlan-net   --name my-macvlan-alpine   alpine:latest  ash
-
-docker run --rm -it --network my-macvlan-net -p 80:80 -p 443:443 -p 1883:1883 -p 8883:8883 --name broadlink2mqtt -v data:/broadlink-mqtt/data broadlink2mqtt

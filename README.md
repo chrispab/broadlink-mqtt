@@ -1,20 +1,42 @@
 
-# Dockerized
-## Build
-```
-docker build . -t broadlink2mqtt
-```
-## Run
-```
-docker run --rm -it --network my-macvlan-net -p 80:80 -p 443:443 -p 1883:1883 -p 8883:8883 --name broadlink2mqtt -v broadlink_data:/broadlink-mqtt/data broadlink2mqtt
-```
-### old - not working
-- docker build . -t broadlink2mqtt
-- docker run -it --name broadlink2mqtt -v ./data:/broadlink-mqtt/data broadlink2mqtt 
-# MQTT client to control BroadLink devices (This includes British General (BG) Smart Sockets)
+forked from https://github.com/eschava/broadlink-mqtt.git, and pi IOTstack dockerised
+# Dockerization
+## For Pi4, do these on 'the' platform
 
-Note: To do the initial BG smartsocket connect to home wifi network, use this utility first (rather than the BG or broadlink app):
-https://github.com/mjg59/python-broadlink
+## build the image
+```docker build -t broadlink2mqtt:latest .```
+### or
+```docker build -t broadlink2mqtt .```
+## run the image
+```docker run --rm -it --network host --name broadlink2mqtt -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data  broadlink2mqtt:latest```
+
+## while it still exists - commit and push it
+container must be running or stopped(not removed) to push
+docker login
+### e.g with extras 
+```docker commit -m "pi broadlink2mqtt python3 img" -a "chris b" broadlink2mqtt broadlink2mqtt:latest```
+### basic commit
+```docker commit  broadlink2mqtt chrispab/broadlink2mqtt:latest```
+```docker push chrispab/broadlink2mqtt:latest```
+
+## when running in IOtstack:
+create the host folder and put custom.conf file from this repo into data folder before docker compose up. folder : ~/IOTstack/volumes/broadlink2mqtt/data
+
+folder mapping is in the docker compose file - -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data
+
+in IOTstack on pi use this in comnpose file:
+``` yml
+version: '3.6'
+services:
+
+  broadlink2mqtt:
+    container_name: broadlink2mqtt
+    image: chrispab/broadlink2mqtt:latest
+    volumes:
+      - ./volumes/broadlink2mqtt/data:/app/data
+    restart: unless-stopped
+    network_mode: host
+```
 
 If setting up using the BG app, only add new device via AP config button, DO NOT complete the BG app 'add' device to app section.
 Close the BGF appp before the final ADD/SETUP stage
@@ -30,7 +52,7 @@ Close the BGF appp before the final ADD/SETUP stage
  
 ## Installation
 Clone *broadlink-mqtt* repository using  
-`git clone https://github.com/eschava/broadlink-mqtt.git`  
+`git clone https://github.com/chrispab/broadlink-mqtt.git`  
 or download and unpack latest archive from  
 https://github.com/eschava/broadlink-mqtt/archive/master.zip
 
