@@ -22,16 +22,26 @@ except ImportError:
     HAVE_TLS = False
 
 # read initial config files
-dirname = os.path.dirname(os.path.abspath(__file__)) + '/data/'
-print(dirname)
+
+
+print("cwd: " + os.getcwd())
+
+dirname = os.path.dirname(os.path.abspath(__file__))
+print("file path name: " + dirname)
+dirname = dirname + '/data/'
+
+CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
+print("CONFIG: "+CONFIG)
+CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
+print("CONFIG_CUSTOM: "+CONFIG_CUSTOM)
+
+print("path with data dir: " + dirname)
 confname = dirname + 'logging.conf'
+# confname = 'logging.conf'
 print("confnamem : " + confname)
 logging.config.fileConfig(confname)
 # logging.config.fileConfig('logging.conf')
-CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
-print(CONFIG)
-CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
-print(CONFIG_CUSTOM)
+
 
 
 class Config(object):

@@ -6,26 +6,20 @@ FROM python:3.8.7
 RUN pip3 install paho-mqtt
 RUN pip3 install broadlink
 
-RUN mkdir -p /broadlink2mqtt/data
-COPY . /
+RUN mkdir -p /app/data
+WORKDIR /app
 
-# RUN pip3 install -r requirements.txt
-# RUN pip3 install -r /broadlink2mqtt/requirements.txt
-# RUN pip3 install paho-mqtt
-# RUN pip3 install broadlink
+COPY . .
+RUN ls
+RUN cd data && ls
 
-# EXPOSE 80
-# EXPOSE 1883
-# EXPOSE 443
-
-
-WORKDIR /
+# WORKDIR /app
 RUN echo 'we are running '
 # CMD ["python3", "mqtt.py"]
-# CMD ["python3", "mqtt.py"]
-ENTRYPOINT [ "python3" ]
+CMD ["python3", "mqtt.py"]
+# ENTRYPOINT [ "python3" ]
 
-CMD [ "mqtt.py" ]
+# CMD [ "mqtt.py" ]
 # docker build . -t broadlink2mqtt
 # docker run -it --name broadlink2mqtt -v data:/broadlink-mqtt/data broadlink2mqtt
 #docker run --rm -it -p 80:80 -p 443:443 -p 1883:1883 --name broadlink2mqtt -v broadlink_data:/broadlink2mqtt/data broadlink2mqtt:latest
