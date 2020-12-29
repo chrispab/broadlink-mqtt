@@ -7,6 +7,7 @@ RUN pip3 install paho-mqtt
 RUN pip3 install broadlink
 
 RUN mkdir -p /app/data
+# ID=$(id -u)
 WORKDIR /app
 
 COPY . .
@@ -62,15 +63,20 @@ CMD ["python3", "mqtt.py"]
 #############################
 ####these
 # build the image
-#docker build . -t broadlink2mqtt:latest
+# docker build -t broadlink2mqtt:latest .
+# or
 # docker build -t broadlink2mqtt .
 # run the image
-# docker run --rm -it --network host -p 80:80 -p 443:443 -p 1883:1883 --name broadlink2mqtt -v broadlink_data:/broadlink2mqtt/data broadlink2mqtt:latest
-# docker run --rm -it --network host --name broadlink2mqtt -v broadlink_data:/broadlink2mqtt/data broadlink2mqtt:latest
+# docker run --rm -it --network host --name broadlink2mqtt -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data  broadlink2mqtt:latest
 
 # while it still exists - commit and push it
 #container must be running or stopped(not removed) to push
 # docker login
-# docker commit -m "pi broadlink2mqtt python3 img" -a "chris b" broadlink2mqtt broadlink2mqtt:latest
+# ------docker commit -m "pi broadlink2mqtt python3 img" -a "chris b" broadlink2mqtt broadlink2mqtt:latest
 # docker commit  broadlink2mqtt chrispab/broadlink2mqtt:latest
 # docker push chrispab/broadlink2mqtt:latest
+
+# when running in IOtstack:
+# creat the host f volfolder and custom.conf file before it can be docler compose up --~/IOTstack/volumes/broadlink2mqtt/data
+# ensure vol; folder mapping is in the docker compose file - -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data
+

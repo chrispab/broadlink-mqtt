@@ -2,20 +2,23 @@
 # Dockerized
 ## For Pi4, do these on 'the' platform
 
-## Build
-This is built using the 'Dockerfile':
-```
-docker build . -t broadlink2mqtt
+# build the image
+## docker build -t broadlink2mqtt:latest .
+## or
+## docker build -t broadlink2mqtt .
+# run the image
+## docker run --rm -it --network host --name broadlink2mqtt -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data  broadlink2mqtt:latest
 
-docker commit -m "default multiple_lookup" -a "chris b" broadlink2mqtt chrispab/broadlink2mqtt:latest
+# while it still exists - commit and push it
+# container must be running or stopped(not removed) to push
+## docker login
+### ------docker commit -m "pi broadlink2mqtt python3 img" -a "chris b" broadlink2mqtt broadlink2mqtt:latest
+## docker commit  broadlink2mqtt chrispab/broadlink2mqtt:latest
+## docker push chrispab/broadlink2mqtt:latest
 
-docker push chrispab/broadlink2mqtt
-```
-## Run
-To run the container from the command line:
-```
-docker run --rm -it --network my-macvlan-net -p 80:80 -p 443:443 -p 1883:1883 -p 8883:8883 --name broadlink2mqtt -v broadlink_data:/broadlink-mqtt/data broadlink2mqtt
-```
+# when running in IOtstack:
+## creat the host f volfolder and custom.conf file before it can be docler compose up --~/IOTstack/volumes/broadlink2mqtt/data
+## ensure vol; folder mapping is in the docker compose file - -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data
 
 ### old - not working
 - docker build . -t broadlink2mqtt
