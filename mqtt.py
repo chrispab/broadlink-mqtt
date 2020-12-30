@@ -23,17 +23,17 @@ except ImportError:
 
 # read initial config files
 
-print("CONFIG:",CONFIG)
+# print("CONFIG:",CONFIG)
 # print("================================================")
 
-CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
-print("CONFIG_CUSTOM:",CONFIG_CUSTOM)
-print("================================================")
+# CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
+# print("CONFIG_CUSTOM:",CONFIG_CUSTOM)
+# print("================================================")
 
-print("..cwd: " + os.getcwd())
+# print("..cwd: " + os.getcwd())
 
-dirname = os.path.dirname(os.path.abspath(__file__))
-print("dirname: " + dirname)
+# dirname = os.path.dirname(os.path.abspath(__file__))
+# print("dirname: " + dirname)
 # dirname = dirname + '/data/'
 
 # CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
@@ -362,7 +362,6 @@ def get_device(cf):
     print('device_type: ' + cf.get('device_type'))
 
     device_type = cf.get('device_type', 'lookup')
-    print("device_type: "+device_type)
     if device_type == 'lookup':
         local_address = cf.get('local_address', None)
         # print(local_address)
@@ -396,12 +395,9 @@ def get_device(cf):
                 host=device.host[0],
                 mac='_'.join(format(s, '02x') for s in device.mac[::-1]),
                 mac_nic='_'.join(format(s, '02x') for s in device.mac[2::-1]))
-            print("END 1")
             print(device,topic_prefix, mqtt_subprefix)
             device = configure_device(device, topic_prefix + mqtt_subprefix)
-            print("END 2")
             devices_dict[mqtt_subprefix] = device
-            print("END 3")
         return devices_dict
     elif device_type == 'test':
         return configure_device(TestDevice(cf), topic_prefix)
@@ -431,12 +427,9 @@ def get_device(cf):
 
 
 def configure_device(device, mqtt_prefix):
-    print("END 4")
     device.auth()
-    print("END 5")
     logging.debug('Connected to \'%s\' Broadlink device at \'%s\' (MAC %s) and started listening for commands at MQTT topic having prefix \'%s\' '
                   % (device.type, device.host[0], ':'.join(format(s, '02x') for s in device.mac[::-1]), mqtt_prefix))
-    print("END 6")
     broadlink_rm_temperature_interval = cf.get('broadlink_rm_temperature_interval', 0)
     if (device.type == 'RM2' or device.type == 'RM4') and broadlink_rm_temperature_interval > 0:
         scheduler = sched.scheduler(time.time, time.sleep)
