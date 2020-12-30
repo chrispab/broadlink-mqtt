@@ -359,7 +359,7 @@ def macro(device, file):
 def get_device(cf):
 
     print("looking for device(s)!")
-    print('device_type: ' + cf.get('device_type'))
+    print('device_type: ' + cf.get('device_type', 'lookup'))
 
     device_type = cf.get('device_type', 'lookup')
     if device_type == 'lookup':
