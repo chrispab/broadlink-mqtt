@@ -14,12 +14,13 @@ forked from https://github.com/eschava/broadlink-mqtt.git, and pi IOTstack docke
 container must be running or stopped(not removed) to push
 
 ```docker login```
-### e.g with extras 
-```docker commit -m "pi broadlink2mqtt python3 img" -a "chris b" broadlink2mqtt broadlink2mqtt:latest```
 ### basic commit
 ```docker commit  broadlink2mqtt chrispab/broadlink2mqtt:latest```
+#### or
+### commit with extras 
+```docker commit -m "pi broadlink2mqtt python3 img" -a "chris b" broadlink2mqtt broadlink2mqtt:latest```
+### push
 ```docker push chrispab/broadlink2mqtt:latest```
-
 ## when running in IOTstack:
 create the host folder and put custom.conf file from this repo into data folder before docker compose up. folder : ~/IOTstack/volumes/broadlink2mqtt/data
 
