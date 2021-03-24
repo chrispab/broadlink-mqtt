@@ -1,10 +1,19 @@
-FROM python:3.8.7
-
-# RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python3 python3-dev git python3-pip python3-setuptools
+# FROM python:latest
+FROM debian:buster
+ RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python3 python3-dev git python3-pip python3-setuptools
 # RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python-dev git python-pip python-setuptools
 
-RUN pip3 install paho-mqtt
+# RUN apt-get install build-essential libssl-dev libffi-dev python3-dev cargo
+# RUN python3 -m pip install 
+#--no-use-pep517 cryptography
+#  RUN pip install --upgrade pip
+# RUN pip3 install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip
+RUN pip install paho-mqtt
+RUN pip install cryptography
+
 RUN pip3 install broadlink
+#==0.15.0
 
 RUN mkdir -p /app/data
 # ID=$(id -u)
@@ -77,3 +86,4 @@ CMD ["python3", "mqtt.py"]
 # creat the host f volfolder and custom.conf file before it can be docler compose up --~/IOTstack/volumes/broadlink2mqtt/data
 # ensure vol; folder mapping is in the docker compose file - -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data
 
+# docker run --rm -it --network host --name broadlink2mqtttest1 -v ~/IOTstack/volumes/bltest1/data:/app/data  broadlink2mqtt:test1
