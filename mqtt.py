@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import paho.mqtt.client as paho  # pip install paho-mqtt
 import broadlink  # pip install broadlink
@@ -494,7 +494,7 @@ def configure_device(device, mqtt_prefix):
             tt.start()
 
     broadlink_bg1_state_interval = cf.get('broadlink_bg1_state_interval', 0)
-    if device.type == 'BG1' and broadlink_bg1_state_interval > 0:
+    if (device.type == 'BG1' or device.type == 'SP4B') and broadlink_bg1_state_interval > 0:
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(broadlink_bg1_state_interval, 1, broadlink_bg1_state_timer,
                         [scheduler, broadlink_bg1_state_interval, device, mqtt_prefix])
@@ -587,13 +587,13 @@ def broadlink_bg1_state_timer(scheduler, delay, device, mqtt_prefix):
         if is_json:
             topic = mqtt_prefix + "state"
             value = json.dumps(state)
-            logging.debug("Sending BG1 state '%s' to topic '%s'" % (value, topic))
+            logging.debug("-Sending '%s' state '%s' to topic '%s'" % (device.type, value, topic))
             mqttc.publish(topic, value, qos=qos, retain=retain)
         elif state is not None:
             for name in state:
                 topic = mqtt_prefix + "state/" + name
                 value = str(state[name])
-                logging.debug("Sending BG1 %s '%s' to topic '%s'" % (name, value, topic))
+                logging.debug("--Sending '%s' : '%s' : '%s' to topic '%s'" % (device.type, name, value, topic))
                 mqttc.publish(topic, value, qos=qos, retain=retain)
     except:
         logging.exception("Error")

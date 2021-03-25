@@ -2,7 +2,9 @@
 forked from https://github.com/eschava/broadlink-mqtt.git, and pi IOTstack dockerised
 # Dockerization
 ## For Pi4, do these on 'the' platform
-
+# note use cryptography==3.2 in dockerfile or it breaks
+docker build . -t broadlink2mqtt:test1 .
+docker run --rm -it --network host --name broadlink2mqtttest1 -v ~/IOTstack/volumes/bltest1/data:/app/data  broadlink2mqtt:test1
 ## build the image
 ```docker build -t broadlink2mqtt:latest .```
 ### or
