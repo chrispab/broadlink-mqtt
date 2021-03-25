@@ -155,6 +155,12 @@ def on_message(client, device, msg):
                 logging.debug("Setting power state of all sockets to {0}".format(state))
                 device.set_state(pwr1=state, pwr2=state)
                 return
+            # power adapters
+            if device.type == 'SP4B':
+                state = action == 'on' or action == '1'
+                logging.debug("Setting power state of adapter to {0}".format(state))
+                device.set_state(state)
+                return
 
         # MP1 power control
         if command.startswith('power/') and device.type == 'MP1':
@@ -389,7 +395,7 @@ def get_device(cf):
         mqtt_multiple_prefix_format = cf.get('mqtt_multiple_subprefix_format', None)
         devices_dict = {}
         for device in devices:
-            print(devices)
+            print(device)
             mqtt_subprefix = mqtt_multiple_prefix_format.format(
                 type=device.type,
                 host=device.host[0],
@@ -593,7 +599,7 @@ def broadlink_bg1_state_timer(scheduler, delay, device, mqtt_prefix):
             for name in state:
                 topic = mqtt_prefix + "state/" + name
                 value = str(state[name])
-                logging.debug("--Sending '%s' : '%s' : '%s' to topic '%s'" % (device.type, name, value, topic))
+                logging.debug("--Sending device type: '%s', name: '%s', value: '%s' to topic: '%s'" % (device.type, name, value, topic))
                 mqttc.publish(topic, value, qos=qos, retain=retain)
     except:
         logging.exception("Error")
