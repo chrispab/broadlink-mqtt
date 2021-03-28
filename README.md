@@ -129,6 +129,9 @@ To stop the service:
 To restart the service:  
 `sudo systemctl restart broadlink-mqtt.service`
 
+# Known issues
+### Authentication failed
+This error means that device is registered in the phone app and cannot be used from broadlink-mqtt utility. To fix this you need to reset the device and use it with broadlink-mqtt only
 
 # RM2/RM3/RM4
 ### MQTT commands to control IR/RF
@@ -163,9 +166,10 @@ first time: `auto` -> `broadlink/tv/samsung/power` records command
 every next time: `auto` -> `broadlink/tv/samsung/power` replays command  
 
 #### Macros
-Macros are created to send several IR signals for single MQTT message.  
+Macro command sends several IR signals for single MQTT message.  
 To start macros execution send `macro` message to the topic `broadlink/MACRO_ID`,  
 where `MACRO_ID` is a path to scenario file in `macros/` folder.  
+Alternative way of sending macro command is sending `MACRO_ID` message to the `broadlink/macro` topic.  
 
 Macros scenario file could contain:
  - IR commands (same as `COMMAND_ID` in replay mode)

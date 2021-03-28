@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import paho.mqtt.client as paho  # pip install paho-mqtt
 import broadlink  # pip install broadlink
@@ -21,38 +21,13 @@ try:
 except ImportError:
     HAVE_TLS = False
 
-# read initial config files
-
-# print("CONFIG:",CONFIG)
-# print("================================================")
-
-# CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
-# print("CONFIG_CUSTOM:",CONFIG_CUSTOM)
-# print("================================================")
-
-# print("..cwd: " + os.getcwd())
-
-# dirname = os.path.dirname(os.path.abspath(__file__))
-# print("dirname: " + dirname)
-# dirname = dirname + '/data/'
-
-# CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
-# print("CONFIG: "+CONFIG)
-# CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
-# print("CONFIG_CUSTOM: "+CONFIG_CUSTOM)
-
-# print("path with data dir: " + dirname)
-# confname = dirname + 'logging.conf'
-# # confname = 'logging.conf'
-# print("confnamem : " + confname)
-# logging.config.fileConfig(confname)
-# # logging.config.fileConfig('logging.conf')
-
-# read initial config files
+# read initial config filesgg
 dirname = os.path.dirname(os.path.abspath(__file__)) + '/'
+print (dirname)
 logging.config.fileConfig(dirname + 'logging.conf')
 CONFIG = os.getenv('BROADLINKMQTTCONFIG', dirname + 'mqtt.conf')
-CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'data/custom.conf')
+CONFIG_CUSTOM = os.getenv('BROADLINKMQTTCONFIGCUSTOM', dirname + 'custom.conf')
+
 
 class Config(object):
     def __init__(self, filename=CONFIG, custom_filename=CONFIG_CUSTOM):
@@ -60,9 +35,7 @@ class Config(object):
         exec(compile(open(filename, "rb").read(), filename, 'exec'), self.config)
         if os.path.isfile(custom_filename):
             exec(compile(open(custom_filename, "rb").read(), custom_filename, 'exec'), self.config)
-            print("Found custom config")
-            # print(self.config)
-        
+
         if self.config.get('ca_certs', None) is not None:
             self.config['tls'] = True
 
@@ -121,6 +94,7 @@ def on_message(client, device, msg):
 
     # internal notification
     if command == 'temperature' or \
+            command == 'humidity' or \
             command == 'energy' or \
             command == 'sensors' or \
             command == 'position' or \
@@ -154,12 +128,6 @@ def on_message(client, device, msg):
                 state = action == 'on' or action == '1'
                 logging.debug("Setting power state of all sockets to {0}".format(state))
                 device.set_state(pwr1=state, pwr2=state)
-                return
-            # power adapters
-            if device.type == 'SP4B':
-                state = action == 'on' or action == '1'
-                logging.debug("Setting power state of adapter to {0}".format(state))
-                device.set_state(state)
                 return
 
         # MP1 power control
@@ -219,7 +187,11 @@ def on_message(client, device, msg):
             file = dirname + "commands/" + command
             handy_file = file + '/' + action
 
-            if action == '' or action == 'auto':
+            if command == 'macro':
+                file = dirname + "macros/" + action
+                macro(device, file)
+                return
+            elif action == '' or action == 'auto':
                 record_or_replay(device, file)
                 return
             elif action == 'autorf':
@@ -283,10 +255,13 @@ def record(device, file):
     device.enter_learning()
     ir_packet = None
     attempt = 0
-    while ir_packet is None and attempt < 6:
-        time.sleep(5)
-        ir_packet = device.check_data()
+    while ir_packet is None and attempt < 8:
         attempt = attempt + 1
+        time.sleep(5)
+        try:
+            ir_packet = device.check_data()
+        except (broadlink.exceptions.ReadError, broadlink.exceptions.StorageError):
+            continue
     if ir_packet is not None:
         # write to file
         directory = os.path.dirname(file)
@@ -296,7 +271,7 @@ def record(device, file):
             f.write(binascii.hexlify(ir_packet))
         logging.debug("Done")
     else:
-        logging.warn("No command received")
+        logging.warning("No command received")
 
 
 def record_rf(device, file):
@@ -363,14 +338,9 @@ def macro(device, file):
 
 
 def get_device(cf):
-
-    print("looking for device(s)!")
-    print('device_type: ' + cf.get('device_type', 'lookup'))
-
     device_type = cf.get('device_type', 'lookup')
     if device_type == 'lookup':
         local_address = cf.get('local_address', None)
-        # print(local_address)
         lookup_timeout = cf.get('lookup_timeout', 20)
         devices = broadlink.discover(timeout=lookup_timeout) if local_address is None else \
             broadlink.discover(timeout=lookup_timeout, local_ip_address=local_address)
@@ -383,7 +353,6 @@ def get_device(cf):
                           ')')
             sys.exit(2)
         return configure_device(devices[0], topic_prefix)
-
     elif device_type == 'multiple_lookup':
         local_address = cf.get('local_address', None)
         lookup_timeout = cf.get('lookup_timeout', 20)
@@ -395,13 +364,11 @@ def get_device(cf):
         mqtt_multiple_prefix_format = cf.get('mqtt_multiple_subprefix_format', None)
         devices_dict = {}
         for device in devices:
-            print(device)
             mqtt_subprefix = mqtt_multiple_prefix_format.format(
                 type=device.type,
                 host=device.host[0],
-                mac='_'.join(format(s, '02x') for s in device.mac[::-1]),
-                mac_nic='_'.join(format(s, '02x') for s in device.mac[2::-1]))
-            print(device,topic_prefix, mqtt_subprefix)
+                mac='_'.join(format(s, '02x') for s in device.mac),
+                mac_nic='_'.join(format(s, '02x') for s in device.mac[3::]))
             device = configure_device(device, topic_prefix + mqtt_subprefix)
             devices_dict[mqtt_subprefix] = device
         return devices_dict
@@ -434,8 +401,9 @@ def get_device(cf):
 
 def configure_device(device, mqtt_prefix):
     device.auth()
-    logging.debug('Connected to \'%s\' Broadlink device at \'%s\' (MAC %s) and started listening for commands at MQTT topic having prefix \'%s\' '
-                  % (device.type, device.host[0], ':'.join(format(s, '02x') for s in device.mac[::-1]), mqtt_prefix))
+    logging.debug('Connected to \'%s\' Broadlink device at \'%s\' (MAC %s) and started listening to MQTT commands at \'%s#\' '
+                  % (device.type, device.host[0], ':'.join(format(s, '02x') for s in device.mac), mqtt_prefix))
+
     broadlink_rm_temperature_interval = cf.get('broadlink_rm_temperature_interval', 0)
     if (device.type == 'RM2' or device.type == 'RM4') and broadlink_rm_temperature_interval > 0:
         scheduler = sched.scheduler(time.time, time.sleep)
@@ -520,6 +488,12 @@ def broadlink_rm_temperature_timer(scheduler, delay, device, mqtt_prefix):
         topic = mqtt_prefix + "temperature"
         logging.debug("Sending RM temperature " + temperature + " to topic " + topic)
         mqttc.publish(topic, temperature, qos=qos, retain=retain)
+
+        if device.type == 'RM4':
+            humidity = str(device.check_humidity())
+            topic = mqtt_prefix + "humidity"
+            logging.debug("Sending RM humidity " + humidity + " to topic " + topic)
+            mqttc.publish(topic, humidity, qos=qos, retain=retain)
     except:
         logging.exception("Error")
 
@@ -599,7 +573,7 @@ def broadlink_bg1_state_timer(scheduler, delay, device, mqtt_prefix):
             for name in state:
                 topic = mqtt_prefix + "state/" + name
                 value = str(state[name])
-                logging.debug("--Sending device type: '%s', name: '%s', value: '%s' to topic: '%s'" % (device.type, name, value, topic))
+                logging.debug("--Sending BG1 %s '%s' to topic '%s'" % (name, value, topic))
                 mqttc.publish(topic, value, qos=qos, retain=retain)
     except:
         logging.exception("Error")
@@ -643,8 +617,6 @@ if __name__ == '__main__':
 
     mqttc.username_pw_set(cf.get('mqtt_username'), cf.get('mqtt_password'))
 
-
-    print("MQTT broker: " + cf.get('mqtt_broker', 'localhost'))
     while True:
         try:
             mqttc.connect(cf.get('mqtt_broker', 'localhost'), int(cf.get('mqtt_port', '1883')), 60)
