@@ -32,6 +32,8 @@ or
 ### So you end up with structure:
 `~/IOTstack/volumes/broadlink-mqtt/(repo contents here)`
 
+This copies the whole repo to the host folder `~/IOTstack/volumes/broadlink-mqtt`. then thats overlayed on the container dir `/broadlink-mqtt` when you 'run' the container with `-v ~/IOTstack/volumes/broadlink-mqtt:/broadlink-mqtt`
+
 You can edit code in here, and restart the container to see the results without having to re-build and push each time you make a mod.
 
 ## To add to IOTStack dockercompose.yml file:
@@ -58,6 +60,7 @@ $ cd ~/IOTstack
 $ docker-compose up -d «container»
 $ docker-compose up -d
 
+you may need to create a mqtt.log file in the source folder and adjust perms
 
 
 ```
@@ -84,3 +87,6 @@ services:
 ```
 
 
+adding
+
+BG Electrical AHC/U-01 0x51e2

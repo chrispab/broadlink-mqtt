@@ -129,6 +129,12 @@ def on_message(client, device, msg):
                 logging.debug("Setting power state of all sockets to {0}".format(state))
                 device.set_state(pwr1=state, pwr2=state)
                 return
+            # power adapters
+            if device.type == 'SP4B':
+                state = action == 'on' or action == '1'
+                logging.debug("Setting power state of adapter to {0}".format(state))
+                device.set_state(state)
+                return
 
         # MP1 power control
         if command.startswith('power/') and device.type == 'MP1':
@@ -393,6 +399,9 @@ def get_device(cf):
             device = broadlink.dooya(host=host, mac=mac, devtype=0x4E4D)
         elif device_type == 'bg1':
             device = broadlink.bg1(host=host, mac=mac, devtype=0x51E3)
+        elif device_type == 'sp4b':
+            device = broadlink.bg1(host=host, mac=mac, devtype=0x51E2)
+                        
         else:
             logging.error('Incorrect device configured: ' + device_type)
             sys.exit(2)
@@ -472,6 +481,17 @@ def configure_device(device, mqtt_prefix):
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(broadlink_bg1_state_interval, 1, broadlink_bg1_state_timer,
                         [scheduler, broadlink_bg1_state_interval, device, mqtt_prefix])
+        # scheduler.run()
+        tt = SchedulerThread(scheduler)
+        tt.daemon = True
+        tt.start()
+
+
+    # broadlink_bg1_state_interval = cf.get('broadlink_bg1_state_interval', 0)
+    if (device.type == 'SP4BTEST') and cf.get('broadlink_sp4b_state_interval', 0) > 0:
+        scheduler = sched.scheduler(time.time, time.sleep)
+        scheduler.enter(broadlink_sp4b_state_interval, 1, broadlink_sp4b_state_timer,
+                        [scheduler, broadlink_sp4b_state_interval, device, mqtt_prefix])
         # scheduler.run()
         tt = SchedulerThread(scheduler)
         tt.daemon = True
@@ -567,17 +587,36 @@ def broadlink_bg1_state_timer(scheduler, delay, device, mqtt_prefix):
         if is_json:
             topic = mqtt_prefix + "state"
             value = json.dumps(state)
-            logging.debug("-Sending '%s' state '%s' to topic '%s'" % (device.type, value, topic))
+            logging.debug("Sending '%s' state '%s' to topic '%s'" % (device.type, value, topic))
             mqttc.publish(topic, value, qos=qos, retain=retain)
         elif state is not None:
             for name in state:
                 topic = mqtt_prefix + "state/" + name
                 value = str(state[name])
-                logging.debug("--Sending BG1 %s '%s' to topic '%s'" % (name, value, topic))
+                logging.debug("Sending BG1 %s '%s' to topic '%s'" % (name, value, topic))
                 mqttc.publish(topic, value, qos=qos, retain=retain)
     except:
         logging.exception("Error")
 
+def broadlink_sp4b_state_timer(scheduler, delay, device, mqtt_prefix):
+    scheduler.enter(delay, 1, broadlink_sp4b_state_timer, [scheduler, delay, device, mqtt_prefix])
+
+    try:
+        is_json = cf.get('broadlink_sp4b_state_json', False)
+        state = device.get_state()
+        if is_json:
+            topic = mqtt_prefix + "state"
+            value = json.dumps(state)
+            logging.debug("----Sending '%s' state '%s' to topic '%s'" % (device.type, value, topic))
+            mqttc.publish(topic, value, qos=qos, retain=retain)
+        elif state is not None:
+            for name in state:
+                topic = mqtt_prefix + "state/" + name
+                value = str(state[name])
+                logging.debug("------Sending SP4B %s '%s' to topic '%s'" % (name, value, topic))
+                mqttc.publish(topic, value, qos=qos, retain=retain)
+    except:
+        logging.exception("Error")
 
 class SchedulerThread(Thread):
     def __init__(self, scheduler):
