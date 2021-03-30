@@ -1,4 +1,11 @@
+## How to build, push and use a container for using broadlink-mqtt on a Pi 4 running IOTstack
+
+
 ### To build the image
+clone this repo to a Raspberry Pi that has docker installed
+
+cd into repo dir
+
 ```
 $ docker build -f DockerfilePi4 -t broadlink-mqtt:pi4 .
 ```

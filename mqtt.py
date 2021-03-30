@@ -79,6 +79,9 @@ topic_prefix = cf.get('mqtt_topic_prefix', 'broadlink/')
 
 # noinspection PyUnusedLocal
 def on_message(client, device, msg):
+    # logging.debug("==Message recieved, device: " + str(device))
+    # logging.debug("==Message recieved, topic: " + str(msg.topic))
+    # logging.debug("==Message recieved, payload: " + str( msg.payload))
     command = msg.topic[len(topic_prefix):]
 
     if isinstance(device, dict):
@@ -107,7 +110,7 @@ def on_message(client, device, msg):
         action = msg.payload.decode('utf-8').lower()
         logging.debug("Received MQTT message " + msg.topic + " " + action)
 
-        # SP1/2 / MP1/ BG1 power control
+        # SP1/2 / MP1/ BG1 SP4B power control
         if command == 'power':
             if device.type == 'SP1' or device.type == 'SP2':
                 state = action == 'on' or action == '1'
@@ -133,7 +136,8 @@ def on_message(client, device, msg):
             if device.type == 'SP4B':
                 state = action == 'on' or action == '1'
                 logging.debug("Setting power state of adapter to {0}".format(state))
-                device.set_state(state)
+                device.set_state(pwr=state)
+                logging.debug("Setting power state of adapter to {0}".format(state))
                 return
 
         # MP1 power control
@@ -370,6 +374,10 @@ def get_device(cf):
         mqtt_multiple_prefix_format = cf.get('mqtt_multiple_subprefix_format', None)
         devices_dict = {}
         for device in devices:
+            #print("got device: " + device)
+            #print("got device: %s: " % (device))
+            logging.debug('Discovered device: ' + str(device) )
+
             mqtt_subprefix = mqtt_multiple_prefix_format.format(
                 type=device.type,
                 host=device.host[0],
@@ -412,6 +420,8 @@ def configure_device(device, mqtt_prefix):
     device.auth()
     logging.debug('Connected to \'%s\' Broadlink device at \'%s\' (MAC %s) and started listening to MQTT commands at \'%s#\' '
                   % (device.type, device.host[0], ':'.join(format(s, '02x') for s in device.mac), mqtt_prefix))
+    
+    logging.debug("==--Device authenticated, device: " + str(device))
 
     broadlink_rm_temperature_interval = cf.get('broadlink_rm_temperature_interval', 0)
     if (device.type == 'RM2' or device.type == 'RM4') and broadlink_rm_temperature_interval > 0:
@@ -477,7 +487,7 @@ def configure_device(device, mqtt_prefix):
             tt.start()
 
     broadlink_bg1_state_interval = cf.get('broadlink_bg1_state_interval', 0)
-    if (device.type == 'BG1' or device.type == 'SP4B') and broadlink_bg1_state_interval > 0:
+    if (device.type == 'BG1') and broadlink_bg1_state_interval > 0:
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(broadlink_bg1_state_interval, 1, broadlink_bg1_state_timer,
                         [scheduler, broadlink_bg1_state_interval, device, mqtt_prefix])
@@ -487,8 +497,8 @@ def configure_device(device, mqtt_prefix):
         tt.start()
 
 
-    # broadlink_bg1_state_interval = cf.get('broadlink_bg1_state_interval', 0)
-    if (device.type == 'SP4BTEST') and cf.get('broadlink_sp4b_state_interval', 0) > 0:
+    broadlink_sp4b_state_interval = cf.get('broadlink_sp4b_state_interval', 0)
+    if (device.type == 'SP4B') and broadlink_sp4b_state_interval > 0:
         scheduler = sched.scheduler(time.time, time.sleep)
         scheduler.enter(broadlink_sp4b_state_interval, 1, broadlink_sp4b_state_timer,
                         [scheduler, broadlink_sp4b_state_interval, device, mqtt_prefix])
@@ -607,13 +617,13 @@ def broadlink_sp4b_state_timer(scheduler, delay, device, mqtt_prefix):
         if is_json:
             topic = mqtt_prefix + "state"
             value = json.dumps(state)
-            logging.debug("----Sending '%s' state '%s' to topic '%s'" % (device.type, value, topic))
+            logging.debug("Sending '%s' state '%s' to topic '%s'" % (device.type, value, topic))
             mqttc.publish(topic, value, qos=qos, retain=retain)
         elif state is not None:
             for name in state:
                 topic = mqtt_prefix + "state/" + name
                 value = str(state[name])
-                logging.debug("------Sending SP4B %s '%s' to topic '%s'" % (name, value, topic))
+                logging.debug("Sending SP4B %s '%s' to topic '%s'" % (name, value, topic))
                 mqttc.publish(topic, value, qos=qos, retain=retain)
     except:
         logging.exception("Error")
@@ -631,6 +641,7 @@ class SchedulerThread(Thread):
 
 
 if __name__ == '__main__':
+    logging.debug("-- Starting up -- ")
     devices = get_device(cf)
 
     clientid = cf.get('mqtt_clientid', 'broadlink-%s' % os.getpid())
