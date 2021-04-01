@@ -82,6 +82,7 @@ def on_message(client, device, msg):
     # logging.debug("==Message recieved, device: " + str(device))
     # logging.debug("==Message recieved, topic: " + str(msg.topic))
     # logging.debug("==Message recieved, payload: " + str( msg.payload))
+    # logging.debug("==Message recieved, msg: " + str(msg))
     command = msg.topic[len(topic_prefix):]
 
     if isinstance(device, dict):

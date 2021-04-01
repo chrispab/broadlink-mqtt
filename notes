@@ -19,4 +19,4 @@ pi@dev:~/broadlink-mqtt $ dockerun --rm -it --network host --name test5 -v ~/IOT
 DEBUG ==Message recieved, device: 
 'SP4B_24_df_a7_a4_cc_ec/': broadlink.switch.sp4b(('192.168.0.18', 80), mac=b'$\xdf\xa7\xa4\xcc\xec', devtype=20962, timeout=10, name='adapter', model='AHC/U-01', manufacturer='BG Electrical', is_locked=False), 
 'SP4B_24_df_a7_a4_c6_ec/': broadlink.switch.sp4b(('192.168.0.28', 80), mac=b'$\xdf\xa7\xa4\xc6\xec', devtype=20962, timeout=10, name='adapter', model='AHC/U-01', manufacturer='BG Electrical', is_locked=False), 
- 'BG1_c8_f7_42_fc_54_bd/': broadlink.switch.bg1(('192.168.0.10', 80), mac=b'\xc8\xf7B\xfcT\xbd', devtype=20963, timeout=10, name='socket', model='BG800/BG900', manufacturer='BG Electrical', is_locked=False)}
+'BG1_c8_f7_42_fc_54_bd/': broadlink.switch.bg1(('192.168.0.10', 80), mac=b'\xc8\xf7B\xfcT\xbd', devtype=20963, timeout=10, name='socket', model='BG800/BG900', manufacturer='BG Electrical', is_locked=False)}
