@@ -59,11 +59,13 @@ then in iotstack, to refetch and run the new container:
 
 ``` yaml
 $ cd ~/IOTstack
-$ docker-compose up -d «container»
+$ docker-compose up -d broadlink-mqtt
 ```
 or
 
-`$ docker-compose up -d`
+```yaml
+$ docker-compose up -d
+```
 
 you may need to create a mqtt.log file in the source folder and adjust perms
 

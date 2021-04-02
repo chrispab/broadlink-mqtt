@@ -9,7 +9,7 @@ docker run --rm -it --network host --name broadlink2mqttt1 -v /opt/broadlink-mqt
 docker run -it --name broadlink2mqtt -v ./data:/broadlink-mqtt/data broadlink2mqtt
 
 #build the image
-pi@dev:~/broadlink-mqtt $ dockebuild  -t broadlink2mqtt:t5 .
+pi@dev:~/broadlink-mqtt $ dockerbuild  -t broadlink2mqtt:t5 .
 
 #copy the whole repo to the host folder '~/IOTstack/volumes/broadlink2mqtt'. then thats overlayed on the container dir '/opt/broadlink-mqtt' when
 # you 'run' the container with '-v ~/IOTstack/volumes/broadlink2mqtt:/opt/broadlink-mqtt'

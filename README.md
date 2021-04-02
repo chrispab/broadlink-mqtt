@@ -1,47 +1,8 @@
 
-forked from https://github.com/eschava/broadlink-mqtt.git, and pi IOTstack dockerised
-# Dockerization
-## For Pi4, do these on 'the' platform
-# note use cryptography==3.2 in dockerfile or it breaks
-docker build . -t broadlink2mqtt:test1 .
-docker run --rm -it --network host --name broadlink2mqtttest1 -v ~/IOTstack/volumes/bltest1/data:/app/data  broadlink2mqtt:test1
-## build the image
-```docker build -t broadlink2mqtt:latest .```
-### or
-```docker build -t broadlink2mqtt .```
-## run the image
-```docker run --rm -it --network host --name broadlink2mqtt -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data  broadlink2mqtt:latest```
+forked from https://github.com/eschava/broadlink-mqtt.git
 
-## while it still exists - commit and push it
-container must be running or stopped(not removed) to push
-
-```docker login```
-### basic commit
-```docker commit  broadlink2mqtt chrispab/broadlink2mqtt:latest```
-#### or
-### commit with extras 
-```docker commit -m "pi broadlink2mqtt python3 img" -a "chris b" broadlink2mqtt broadlink2mqtt:latest```
-### push
-```docker push chrispab/broadlink2mqtt:latest```
-## when running in IOTstack:
-create the host folder and put custom.conf file from this repo into data folder before docker compose up. folder : ~/IOTstack/volumes/broadlink2mqtt/data
-
-folder mapping is in the docker compose file - -v ~/IOTstack/volumes/broadlink2mqtt/data:/app/data
-
-in IOTstack on pi use this in comnpose file:
-``` yml
-version: '3.6'
-services:
-
-  broadlink2mqtt:
-    container_name: broadlink2mqtt
-    image: chrispab/broadlink2mqtt:latest
-    volumes:
-      - ./volumes/broadlink2mqtt/data:/app/data
-    restart: unless-stopped
-    network_mode: host
-```
-
+Pi4 docker info Read more [here](./DockerfilePi4.md)
+***
 If setting up using the BG app, only add new device via AP config button, DO NOT complete the BG app 'add' device to app section.
 Close the BGF appp before the final ADD/SETUP stage
 
@@ -52,6 +13,7 @@ Close the BGF appp before the final ADD/SETUP stage
    * [**MP1**](#mp1) power strip (device_type = 'mp1')  
    * [**Dooya DT360E**](#dooya-dt360e) curtain motor (device_type = 'dooya')  
    * [**BG1**](#bg1) BG smart socket (device_type = 'bg1')  
+   * [**SP4B**](#sp4b) BG smart adapter (device_type = 'sp4b')  
 
  
 ## Installation
@@ -229,7 +191,7 @@ E.g.
 `broadlink_dooya_position_interval`=30  
 means current curtain position in percents will be published to topic `broadlink/position` every 30 seconds  
 
-# BG1
+# BG1 socket (BG Electrical BG800/BG900 0x51e3)
 ### MQTT commands to control
 To change brightness of LED need to send value in percents to `broadlink/brightness` topic  
 To switch power on (off) on all (or single only) outlets need to send command `on` (`off`) to `broadlink/power` topic.  
@@ -244,3 +206,14 @@ E.g.
 `broadlink_bg1_state_interval`=120  
 means current state will be published to topics `broadlink/state/[pwr/pwr1/pwr2/maxworktime/maxworktime1/maxworktime2/idcbrightness]` every 2 minutes    
 
+
+# SP4B - adapter (BG Electrical AHC/U-01 0x51e2)
+### MQTT commands to control
+To switch power on/off on adapter outlets need to send command `on`/`off` to `broadlink/power` topic.  
+Commands `1` / `0` are also supported  
+
+### Subscription to current state
+Need to set `broadlink_sp4b_state_interval` configuration parameter to a number of seconds between periodic updates.  
+E.g.  
+`broadlink_sp4b_state_interval`=120  
+means current state will be published to topics `broadlink/state/[pwr/maxworktime/childlock]` every 2 minutes    
