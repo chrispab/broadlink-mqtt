@@ -1,25 +1,19 @@
 FROM python:3.7.9
 
-# build /opt/mqttwarn
 RUN mkdir -p /broadlink-mqtt
 WORKDIR /broadlink-mqtt
-#RUN mkdir -p /var/log/broadlink
 
-# COPY ./requirements.txt /broadlink-mqtt
-# RUN pip install -r /broadlink-mqtt/requirements.txt
 RUN pip install paho-mqtt==1.5.1
 RUN pip install cryptography==3.2
 RUN pip install broadlink>=0.15.0
 
 # add user pi - 1000 to image
-#RUN usermod -u 1000 pi
 RUN groupadd --gid 1000 pi
-RUN useradd -r --gid 1000 1000
-RUN chown -R 1000:1000 /broadlink-mqtt
-#RUN chown -R 1000:1000 /var/log/broadlink
+RUN useradd --uid 1000 --gid 1000 pi
+RUN chown -R pi:pi /broadlink-mqtt
 
 # process run as mqttwarn user
-USER 1000
+USER pi
 
 # set conf path
 ENV BROADLINKMQTTCONFIG="/broadlink-mqtt/mqtt.conf"
