@@ -12,7 +12,9 @@ RUN pip install cryptography==3.2
 RUN pip install broadlink>=0.15.0
 
 # add user pi - 1000 to image
-RUN groupadd -r 1000 && useradd -r -g 1000 1000
+#RUN usermod -u 1000 pi
+RUN groupadd --gid 1000 pi
+RUN useradd -r --gid 1000 1000
 RUN chown -R 1000:1000 /broadlink-mqtt
 #RUN chown -R 1000:1000 /var/log/broadlink
 
